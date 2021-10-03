@@ -1,0 +1,36 @@
+class TokenPatern:
+    def __init__(self, type, regexp):
+        self.type = type
+        self.regexp = regexp
+       
+
+TokenPaterns = {
+    'CREATE TABLE':TokenPatern('CREATE TABLE', 'CREATE TABLE'),
+    'INDEXED':TokenPatern('INDEXED','INDEXED'),
+    'COMA':TokenPatern('COMA', ','),
+    'SPACE':TokenPatern('SPACE','[ \\n\\r\\t]'),
+    '(':TokenPatern('(','\\('),
+    ')':TokenPatern(')','\\)'),
+    '[':TokenPatern('[','\\['),
+    ']':TokenPatern(']','\\]'),
+    'VAR':TokenPatern('VAR','[_a-zA-Z0-9]+'),
+    'NUMBER': TokenPatern('NUMBER','[0-9]([0-9.]*)' ),
+    'SELECT':TokenPatern('SELECT','SELECT'),
+    'FROM':TokenPatern('FROM','FROM'),
+    'INSERT INTO':TokenPatern('INSERT INTO', 'INSERT INTO'),
+    'WHERE':TokenPatern('WHERE','WHERE'),
+    'GROUP_BY':TokenPatern('GROUP_BY','GROUP_BY'),
+    'DELETE':TokenPatern('DELETE','DELETE'),
+    'EQUAL': TokenPatern('EQUAL','= '),
+    'NOT_EQUEL':TokenPatern('NOT_EQUEL','!='),
+    'MORE_EQUAL':TokenPatern('MORE_EQUAL','>='),
+    'LESS_EQUAL': TokenPatern('LESS_EQUAL','<='),
+    'LESS':TokenPatern('LESS','<'),
+    'MORE':TokenPatern('MORE','>'),
+    'ALL':TokenPatern('ALL','\\*'),
+    'COUNT':TokenPatern('COUNT','COUNT'),
+    'COUNT_DISTINCT':TokenPatern('COUNT_DISTINCT','COUNT_DISTINCT'),
+    'MAX':TokenPatern('MAX','MAX'),
+    'AVG':TokenPatern('AVG','AVG'),
+    'SEMICOLON':TokenPatern('SEMICOLON', ';')
+}
