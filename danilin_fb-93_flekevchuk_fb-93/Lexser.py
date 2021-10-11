@@ -27,4 +27,3 @@ class Lexer:
                 self.__pos = self.__pos + len(result[0])
                 self.__TokenArr.append(Token(TokenPatern.type, result[0], self.__pos))
                 return True
-        raise Exception ('Unknown token on position', self.__pos)

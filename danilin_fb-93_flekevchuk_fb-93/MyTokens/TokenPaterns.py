@@ -13,7 +13,7 @@ TokenPaterns = {
     '[':TokenPatern('[','\\['),
     ']':TokenPatern(']','\\]'),
     'VAR':TokenPatern('VAR','[_a-z0-9]+'),
-    'NUMBER': TokenPatern('NUMBER','[0-9]([0-9.]*)' ),
+    'NUMBER': TokenPatern('NUMBER','[-+]?[0-9]' ),
     'SELECT':TokenPatern('SELECT','SELECT'),
     'FROM':TokenPatern('FROM','FROM'),
     'INSERTINTO':TokenPatern('INSERTINTO', 'INSERTINTO'),
