@@ -25,8 +25,11 @@ class Parser:
     
     def Insert(self, tokenLen):
         varsToInsert = deque()
+        tableName = ""
+
         if(self.__tokens[1].type != "VAR"):
             raise Exception ("Unknown table name")
+        tableName = self.__tokens[1].text
         if(self.__tokens[2].type != "("):
             raise Exception ("( Expected")
         if(self.__tokens[tokenLen-1].type != ")"):
@@ -44,14 +47,20 @@ class Parser:
                     raise Exception ("Unknown token on position ", i)
             
             #TODO: Here will be calling of insertion methood of DB
-        print("Insert into "+ self.__tokens[1].text + " inserted: " )
+        print("Insert into "+ tableName + " inserted: " )
         print(varsToInsert)
     
     def CreateTable(self, tokenLen):
-        
+
+            colums = deque()
+            
+            indexedFields = deque()
+
+            tableName = ""
+
             if(self.__tokens[1].type != "VAR"):
                 raise Exception ('Incorrect table name')
-            
+            tableName = self.__tokens[1].text
             if(self.__tokens[2].type != "("):
                 raise Exception (' ( expected ')
             
@@ -61,9 +70,7 @@ class Parser:
             if(self.__tokens[tokenLen-1].type != ")"):
                 raise Exception (' ) expected ')
             
-            colums = deque()
             
-            indexedFields = deque()
 
             colums.append(self.__tokens[3].text)
 
@@ -87,11 +94,12 @@ class Parser:
                         oldTokenType = "VAR"
                     if(newTokenType == "COMMA"):
                         oldTokenType = "COMMA"
-            print("Table " + self.__tokens[1].text +" created")
+            print("Table " + tableName +" created")
             print("coloms")
             print(colums) 
             print("Indexed fields")
-            print(indexedFields)     
+            print(indexedFields)  
+
                 #TODO: Here will be calling method to create table
     def Delete(self, tokenLen):
         if(self.__tokens[1].type != "FROM"):
@@ -172,13 +180,13 @@ class Parser:
         if(self.__tokens[0].type != "CREATETABLE" and self.__tokens[0].type != "SELECT" and self.__tokens[0].type != "DELETE" and self.__tokens[0].type != "INSERTINTO"):
             raise Exception ('Unknown comand!')
 
-        if(self.__tokens[0].type == "CREATETABLE"):
+        if(self.__tokens[0].type == "CREATE TABLE"):
             self.CreateTable(tokenLen)
 
         if(self.__tokens[0].type == "DELETE"):
             self.Delete(tokenLen)
 
-        if(self.__tokens[0].type == "INSERTINTO"):
+        if(self.__tokens[0].type == "INSERT INTO"):
             self.Insert(tokenLen)
         
         if(self.__tokens[0].type == "SELECT"):

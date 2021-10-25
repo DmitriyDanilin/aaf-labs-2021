@@ -21,7 +21,7 @@ TokenPaterns = {
     'GROUP_BY':TokenPatern('GROUP_BY','GROUP_BY'),
     'DELETE':TokenPatern('DELETE','DELETE'),
     'EQUAL': TokenPatern('EQUAL','='),
-    'NOT_EQUAL':TokenPatern('NOT_EQUEL','!='),
+    'NOT_EQUAL':TokenPatern('NOT_EQUAL','!='),
     'MORE_EQUAL':TokenPatern('MORE_EQUAL','>='),
     'LESS_EQUAL': TokenPatern('LESS_EQUAL','<='),
     'LESS':TokenPatern('LESS','<'),
