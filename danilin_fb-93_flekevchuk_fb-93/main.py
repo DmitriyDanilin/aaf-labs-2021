@@ -1,20 +1,43 @@
 from Lexser import Lexer
 from Parser import Parser
-
-
-string = 'SELECT id, name FROM map WHERE id >= 20'
+from DataBase.index import DataBase
 
 def remove(str):
     return str.replace(" ", "")
 
-stringWithoutSpaces = remove(string)
+DB = DataBase()
+lexer = Lexer()
+parser = Parser(DB)
 
-a = Lexer(stringWithoutSpaces)
-a.LexserAnals()
+queryListing = [
+    'CREATE TABLE names ( var1 INDEXED, var2, var3)',
+    'INSERT INTO names (1,2,3)',
+    'INSERT INTO names (5,9,12)',
+    'INSERT INTO names (6,2,5)',
+    'INSERT INTO names (87,2,3)',
+    'INSERT INTO names (13,6,3)',
+    'INSERT INTO names (2,7,3)',
+    'DELETE FROM names WHERE var2 > 2'
+]
 
-tokens  = a.getTokenArr()
+#while True:
+for query in queryListing:
+    print(query)
+    #string = input()
+    stringWithoutSpaces = remove(query)
+
+    lexer.setCode(stringWithoutSpaces)
+    lexer.LexserAnalis()
+    tokens = lexer.getTokenArr()
+
+    parser.setTokens(tokens)
+    parser.parse()
+    DB.PrintDB()
+
+
+
+'''
 for token in tokens:
     print('{type: ' + token.type + ' , text: "'+ token.text + '" , pos ' + str(token.pos) + '}')
-
-parser = Parser(tokens)
-parser.parse()
+string = 'SELECT id, name FROM map WHERE id >= 2'
+'''

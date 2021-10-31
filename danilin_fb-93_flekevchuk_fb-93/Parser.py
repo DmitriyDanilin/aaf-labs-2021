@@ -3,33 +3,17 @@ from MyTokens.TokenPaterns import TokenPaterns
 from collections import deque
 
 class Parser:
-    __tokens = []
     __pos = 0
+    def __init__(self,DB):
+        self.__tokens = []
+        self.DB = DB
 
-    def __init__(self, tokens):
+    def setTokens(self, tokens):
         self.__tokens = tokens
-
-    def __match(self, expectedTokenTypes):
-        if(self.__pos < len(self.__tokens)):
-            __currentToken = self.__tokens[self.__pos]
-            if(__currentToken in expectedTokenTypes):
-                self.__pos += 1
-                return __currentToken
-        return None
-
-    def __require(self, expectedTokenTypes):
-        token = self.__match(expectedTokenTypes)
-        if(token == None):
-            raise Exception ('On position ', self.__pos, 'expected', expectedTokenTypes[0].type)
-        return token
-    
     def Insert(self, tokenLen):
-        varsToInsert = deque()
-        tableName = ""
-
+        varsToInsert = list()
         if(self.__tokens[1].type != "VAR"):
             raise Exception ("Unknown table name")
-        tableName = self.__tokens[1].text
         if(self.__tokens[2].type != "("):
             raise Exception ("( Expected")
         if(self.__tokens[tokenLen-1].type != ")"):
@@ -39,28 +23,23 @@ class Parser:
             if(self.__tokens[i].type == ")"):
                 break
             if(i % 2 == 1):
-                if (self.__tokens[i].type != "VAR"):
+                if (self.__tokens[i].type != "NUMBER"):
                     raise Exception ("Unknown token on position ", i)
-                varsToInsert.append(self.__tokens[i].text)
+                varsToInsert.append(int(self.__tokens[i].text))
             if(i % 2 == 0):
                 if (self.__tokens[i].type != "COMMA"):
                     raise Exception ("Unknown token on position ", i)
             
             #TODO: Here will be calling of insertion methood of DB
-        print("Insert into "+ tableName + " inserted: " )
-        print(varsToInsert)
+        #print("Insert into "+ self.__tokens[1].text + " inserted: " )
+        #print(varsToInsert)
+        self.DB.Insert(self.__tokens[1].text, varsToInsert)
     
     def CreateTable(self, tokenLen):
-
-            colums = deque()
-            
-            indexedFields = deque()
-
-            tableName = ""
-
+        
             if(self.__tokens[1].type != "VAR"):
                 raise Exception ('Incorrect table name')
-            tableName = self.__tokens[1].text
+            
             if(self.__tokens[2].type != "("):
                 raise Exception (' ( expected ')
             
@@ -70,7 +49,9 @@ class Parser:
             if(self.__tokens[tokenLen-1].type != ")"):
                 raise Exception (' ) expected ')
             
+            colums = list()
             
+            indexedFields = list()
 
             colums.append(self.__tokens[3].text)
 
@@ -94,13 +75,12 @@ class Parser:
                         oldTokenType = "VAR"
                     if(newTokenType == "COMMA"):
                         oldTokenType = "COMMA"
-            print("Table " + tableName +" created")
-            print("coloms")
-            print(colums) 
-            print("Indexed fields")
-            print(indexedFields)  
-
-                #TODO: Here will be calling method to create table
+            #print("Table " + self.__tokens[1].text +" created")
+            #print("coloms")
+            #print(colums) 
+            #print("Indexed fields")
+            #print(indexedFields)    
+            self.DB.CreateTable(self.__tokens[1].text,colums,indexedFields)
     def Delete(self, tokenLen):
         if(self.__tokens[1].type != "FROM"):
             raise Exception ("FROM expected")
@@ -118,10 +98,11 @@ class Parser:
         self.__tokens[5].type != "LESS" and
         self.__tokens[5].type != "MORE"):
             raise Exception ("Unknown token on position 5")
-        if(self.__tokens[6].type != "VAR" and self.__tokens[5].type != "NUMBER"):
+        if(self.__tokens[6].type != "VAR" and self.__tokens[6].type != "NUMBER"):
             raise Exception ("Unknown token on position 6")
             #TODO: Here will be calling delete method of database
         print("Deleting from " + self.__tokens[2].text)
+        self.DB.Delete(self.__tokens[2].text, self.__tokens[4], self.__tokens[5], self.__tokens[6])
 
     def Select(self, tokenLen):
         if (self.__tokens[1].type != "VAR" and self.__tokens[1].type != "ALL"):
@@ -166,7 +147,7 @@ class Parser:
             self.__tokens[werePosition +2].type != "LESS" and
             self.__tokens[werePosition +2].type != "MORE"):
                 raise Exception ("Unknown token on position ", werePosition+2)
-            if( self.__tokens[werePosition +3].type != "VAR"):
+            if( self.__tokens[werePosition +3].type != "VAR" and self.__tokens[werePosition +3].type != "NUMBER"):
                 raise Exception ("Unknown token on position ", werePosition+3)
         #TODO: Here will be calling select method of DB
     
@@ -180,13 +161,13 @@ class Parser:
         if(self.__tokens[0].type != "CREATETABLE" and self.__tokens[0].type != "SELECT" and self.__tokens[0].type != "DELETE" and self.__tokens[0].type != "INSERTINTO"):
             raise Exception ('Unknown comand!')
 
-        if(self.__tokens[0].type == "CREATE TABLE"):
+        if(self.__tokens[0].type == "CREATETABLE"):
             self.CreateTable(tokenLen)
 
         if(self.__tokens[0].type == "DELETE"):
             self.Delete(tokenLen)
 
-        if(self.__tokens[0].type == "INSERT INTO"):
+        if(self.__tokens[0].type == "INSERTINTO"):
             self.Insert(tokenLen)
         
         if(self.__tokens[0].type == "SELECT"):
