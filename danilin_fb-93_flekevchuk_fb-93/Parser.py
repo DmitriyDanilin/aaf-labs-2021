@@ -30,9 +30,6 @@ class Parser:
                 if (self.__tokens[i].type != "COMMA"):
                     raise Exception ("Unknown token on position ", i)
             
-            #TODO: Here will be calling of insertion methood of DB
-        #print("Insert into "+ self.__tokens[1].text + " inserted: " )
-        #print(varsToInsert)
         self.DB.Insert(self.__tokens[1].text, varsToInsert)
     
     def CreateTable(self, tokenLen):
@@ -74,13 +71,10 @@ class Parser:
                         colums.append(self.__tokens[i].text)
                         oldTokenType = "VAR"
                     if(newTokenType == "COMMA"):
-                        oldTokenType = "COMMA"
-            #print("Table " + self.__tokens[1].text +" created")
-            #print("coloms")
-            #print(colums) 
-            #print("Indexed fields")
-            #print(indexedFields)    
+                        oldTokenType = "COMMA"    
             self.DB.CreateTable(self.__tokens[1].text,colums,indexedFields)
+
+
     def Delete(self, tokenLen):
         if(self.__tokens[1].type != "FROM"):
             raise Exception ("FROM expected")
@@ -100,56 +94,141 @@ class Parser:
             raise Exception ("Unknown token on position 5")
         if(self.__tokens[6].type != "VAR" and self.__tokens[6].type != "NUMBER"):
             raise Exception ("Unknown token on position 6")
-            #TODO: Here will be calling delete method of database
+            
         print("Deleting from " + self.__tokens[2].text)
         self.DB.Delete(self.__tokens[2].text, self.__tokens[4], self.__tokens[5], self.__tokens[6])
 
     def Select(self, tokenLen):
-        if (self.__tokens[1].type != "VAR" and self.__tokens[1].type != "ALL"):
+
+        aggregationTypes = ['SUM', 'COUNT', 'MAX', 'MIN', 'AVG']
+        isAggregationInSelectQuery = False
+        allTokenTypes = []
+        aggPosition = 0
+        fromPosition = 0
+        wherePosition =0
+        groupByPosition = 0
+        colums = list()
+        tableName = ''
+        fieldToAggregate = ''
+        aggFunction =''
+        groupByField =''
+
+        for i in range(0, tokenLen):
+            allTokenTypes.append(self.__tokens[i].type)
+            if self.__tokens[i].type in aggregationTypes:
+                isAggregationInSelectQuery = True
+                aggPosition = i
+
+        if (self.__tokens[1].type != "VAR" and self.__tokens[1].type != "ALL" and aggPosition != 1 ):
                  raise Exception ("Unknown token on position 1")
             
-        fromPosition = 0
 
         if(self.__tokens[1].type == "ALL"):
             if(self.__tokens[2].type != "FROM"):
                 raise Exception ("Unknown token on position 2")
-            else:
-                fromPosition = 2
 
-        if(self.__tokens[1].type == "VAR"): #SELECT VAR1, VAR2, ... FROM
-            for i in range(2, tokenLen):
+        if isAggregationInSelectQuery == False:
+            if(self.__tokens[1].type == "VAR"): #SELECT VAR1, VAR2, ... FROM
+                colums.append(self.__tokens[1].text)
+                for i in range(2, tokenLen):
+                    if(self.__tokens[i].type == "FROM"):
+                        break
+                    if(i % 2 == 0):
+                        if(self.__tokens[i].type != "COMMA"):
+                            raise Exception ("Unknown token on position ", i)
+                    if(i % 2 == 1):
+                        if(self.__tokens[i].type != "VAR"):
+                            raise Exception ("Unknown token on position ", i)
+                        else:
+                            colums.append(self.__tokens[i].text)
+
+        else:
+            for i in range(1, tokenLen):
                 if(self.__tokens[i].type == "FROM"):
-                    fromPosition = i
                     break
                 if(i % 2 == 0):
-                    if(self.__tokens[i].type != "COMMA"):
-                        raise Exception ("Unknown token on position ", i)
+                        if(self.__tokens[i].type != "COMMA"):
+                            raise Exception ("Unknown token on position ", i)
                 if(i % 2 == 1):
-                    if(self.__tokens[i].type != "VAR"):
+
+                    if(self.__tokens[i].type != "VAR" and self.__tokens[i].type not in aggregationTypes):
                         raise Exception ("Unknown token on position ", i)
-        if(fromPosition == 0):
-            raise Exception ("From Expected")
+
+                    elif(self.__tokens[i].type in aggregationTypes):
+                        aggFunction = self.__tokens[i].text
+                        fieldToAggregate = self.__tokens[i+2].text
+                        colums.append(self.__tokens[i+2].text)
+                        if(self.__tokens[i+1].type != '(' or self.__tokens[i+2].type != 'VAR' or self.__tokens[i+3].type != ')'):
+                            raise Exception ("Error with aggregation!")
+
+                        for j in range(i+4, tokenLen):
+                            if(self.__tokens[j].type == "FROM"):
+                                break
+                            if(j % 2 == 1):
+                                if(self.__tokens[j].type != "COMMA"):
+                                    raise Exception ("Unknown token on position ", j)
+                            if(j % 2 == 0):
+                                if(self.__tokens[j].type != "VAR"):
+                                    raise Exception ("Unknown token on position ", j)
+                                else:
+                                    colums.append(self.__tokens[j].text)
+                        break
+                    else:
+                        colums.append(self.__tokens[i].text)
+
+
+
+        if 'FROM' not in allTokenTypes:
+            raise Exception ("FROM Expected")
+        else:
+            fromPosition = allTokenTypes.index('FROM') 
+
         if(self.__tokens[fromPosition + 1].type != "VAR"):
             raise Exception ("Expected Table Name")
+        else:
+            tableName = self.__tokens[fromPosition + 1].text
             
-
-        werePosition = fromPosition + 2
-        if(werePosition < tokenLen):
-            if(self.__tokens[werePosition].type != "WHERE"):
+        if 'WHERE' not in allTokenTypes:
+            wherePosition = -1
+        else:
+            wherePosition = allTokenTypes.index('WHERE') 
+        
+        if(wherePosition != -1):
+            if(self.__tokens[wherePosition].type != "WHERE"):
                 raise Exception ("WHERE Expected")
-            if(self.__tokens[werePosition+1].type != "VAR"):
-                raise Exception ("Unknown token on position ", werePosition+1)
+            if(self.__tokens[wherePosition+1].type != "VAR"):
+                raise Exception ("Unknown token on position ", wherePosition+1)
             if(
-            self.__tokens[werePosition +2].type != "EQUAL" and 
-            self.__tokens[werePosition +2].type != "NOT_EQUAL" and 
-            self.__tokens[werePosition +2].type != "MORE_EQUAL" and 
-            self.__tokens[werePosition +2].type != "LESS_EQUAL" and
-            self.__tokens[werePosition +2].type != "LESS" and
-            self.__tokens[werePosition +2].type != "MORE"):
-                raise Exception ("Unknown token on position ", werePosition+2)
-            if( self.__tokens[werePosition +3].type != "VAR" and self.__tokens[werePosition +3].type != "NUMBER"):
-                raise Exception ("Unknown token on position ", werePosition+3)
-        #TODO: Here will be calling select method of DB
+            self.__tokens[wherePosition +2].type != "EQUAL" and 
+            self.__tokens[wherePosition +2].type != "NOT_EQUAL" and 
+            self.__tokens[wherePosition +2].type != "MORE_EQUAL" and 
+            self.__tokens[wherePosition +2].type != "LESS_EQUAL" and
+            self.__tokens[wherePosition +2].type != "LESS" and
+            self.__tokens[wherePosition +2].type != "MORE"):
+                raise Exception ("Unknown token on position ", wherePosition+2)
+            if( self.__tokens[wherePosition +3].type != "VAR" and self.__tokens[wherePosition +3].type != "NUMBER"):
+                raise Exception ("Unknown token on position ", wherePosition+3)
+
+        #variables to send condition
+        var1 = self.__tokens[wherePosition+1].text 
+        cond = self.__tokens[wherePosition+2].text
+        var2 = self.__tokens[wherePosition+3].text
+        
+        if 'GROUPBY' not in allTokenTypes:
+            groupByPosition = -1
+        else:
+            groupByPosition = allTokenTypes.index('GROUPBY')
+
+        if(groupByPosition != -1):
+            groupByField = self.__tokens[groupByPosition+1].text
+
+
+        print(colums)
+        print(tableName)
+        print(aggFunction)
+        print(fieldToAggregate)
+        print(groupByField)
+
     
             
             

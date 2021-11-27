@@ -20,8 +20,12 @@ queryListing = [
     'DELETE FROM names WHERE var2 > 2'
 ]
 
+queryListingForTest = [
+    'SELECT MIN(id), name FROM map WHERE id > 0'
+]
+
 #while True:
-for query in queryListing:
+for query in queryListingForTest:
     print(query)
     #string = input()
     stringWithoutSpaces = remove(query)
@@ -32,7 +36,7 @@ for query in queryListing:
 
     parser.setTokens(tokens)
     parser.parse()
-    DB.PrintDB()
+    #DB.PrintDB()
 
 
 
