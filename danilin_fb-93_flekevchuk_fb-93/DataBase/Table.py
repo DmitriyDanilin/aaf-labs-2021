@@ -35,6 +35,9 @@ class Table:
     def Delete(self, param1, condition, param2):
         allIDs = self.select(param1, condition, param2)
         for id in allIDs:
+            for index in self.indexedColumns:
+                print(index[0])
+                self.indexes[index[0]].DeleteWithID(self.table[id][index[1]], id)
             self.table[id] = None
 
     def select(self, param1, condition, param2):
