@@ -21,7 +21,7 @@ queryListing = [
 ]
 
 queryListingForTest = [
-    'SELECT MIN(id), name FROM map WHERE id > 0'
+    'SELECT COUNT(field), AVG(id), name FROM map WHERE id > 0 GROUP BY id, name'
 ]
 
 #while True:

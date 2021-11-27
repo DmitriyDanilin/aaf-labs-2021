@@ -28,9 +28,8 @@ TokenPaterns = {
     'MORE':TokenPatern('MORE','>'),
     'ALL':TokenPatern('ALL','\\*'),
     'COUNT':TokenPatern('COUNT','COUNT'),
+    'COUNT_DISTINCT':TokenPatern('COUNT_DISTINCT','COUNT_DISTINCT'),
     'MAX':TokenPatern('MAX','MAX'),
     'AVG':TokenPatern('AVG','AVG'),
-    'MIN':TokenPatern('MIN','MIN'),
-    'SUM':TokenPatern('SUM', 'SUM'),
     'SEMICOLON':TokenPatern('SEMICOLON', ';')
 }
