@@ -101,7 +101,6 @@ class Parser:
     def Select(self, tokenLen):
 
         aggregationTypes = ['COUNT_DISTINCT', 'COUNT', 'MAX', 'AVG']
-        isAggregationInSelectQuery = False
         allTokenTypes = []
         fromPosition = 0
         wherePosition =0
@@ -115,10 +114,8 @@ class Parser:
         for i in range(0, tokenLen):
             allTokenTypes.append(self.__tokens[i].type)
             if self.__tokens[i].type in aggregationTypes:
-                isAggregationInSelectQuery = True
                 aggFunctions.append(self.__tokens[i].text)
 
-        print(allTokenTypes)
         if (self.__tokens[1].type != "VAR" and self.__tokens[1].type != "ALL" and  self.__tokens[1].type not in aggregationTypes ):
                  raise Exception ("Unknown token on position 1")
             
@@ -127,48 +124,29 @@ class Parser:
             if(self.__tokens[2].type != "FROM"):
                 raise Exception ("Unknown token on position 2")
 
-        if isAggregationInSelectQuery == False:
-            if(self.__tokens[1].type == "VAR"): #SELECT VAR1, VAR2, ... FROM
-                colums.append(self.__tokens[1].text)
-                for i in range(2, tokenLen):
-                    if(self.__tokens[i].type == "FROM"):
-                        break
-                    if(i % 2 == 0):
-                        if(self.__tokens[i].type != "COMMA"):
-                            raise Exception ("Unknown token on position ", i)
-                    if(i % 2 == 1):
-                        if(self.__tokens[i].type != "VAR"):
-                            raise Exception ("Unknown token on position ", i)
-                        else:
-                            colums.append(self.__tokens[i].text)
-
-        else:
-            i=1
-            while i <= tokenLen:
-                print(i)
-                if(self.__tokens[i].type == "FROM"):
-                    break
-                if(self.__tokens[i].type == "VAR"):
-                    colums.append(self.__tokens[i].text)  
-                    if (self.__tokens[i+1].type != "COMMA"):
-                        if(self.__tokens[i+1].type != "FROM"):
-                            raise Exception ("Unknown token on position ", i+1)
-                    i +=1
-                if(self.__tokens[i].type == "COMMA"):
-                    if(self.__tokens[i+1].type != "VAR" ):
-                        if(self.__tokens[i+1].type not in aggregationTypes):
-                            raise Exception ("Unknown token on position ", i+1)
-                    i+=1
-                if(self.__tokens[i].type in aggregationTypes):
-                    if(self.__tokens[i+1].type != "(" and self.__tokens[i+2].type != "VAR" and self.__tokens[i+3].type != ")"):
-                        raise Exception ("Aggregation Error!")
-                    fieldsToAggregate.append(self.__tokens[i+2].text)
-                    colums.append(self.__tokens[i+2].text)
-                    i +=4
+        i=1
+        while i <= tokenLen: 
+            if(self.__tokens[i].type == "FROM"):
+                break
+            if(self.__tokens[i].type == "VAR"):
+                colums.append(self.__tokens[i].text)  
+                if (self.__tokens[i+1].type != "COMMA"):
+                    if(self.__tokens[i+1].type != "FROM"):
+                        raise Exception ("Unknown token on position ", i+1)
+                i +=1
+            if(self.__tokens[i].type == "COMMA"):
+                if(self.__tokens[i+1].type != "VAR" ):
+                    if(self.__tokens[i+1].type not in aggregationTypes):
+                        raise Exception ("Unknown token on position ", i+1)
+                i+=1
+            if(self.__tokens[i].type in aggregationTypes):
+                if(self.__tokens[i+1].type != "(" and self.__tokens[i+2].type != "VAR" and self.__tokens[i+3].type != ")"):
+                    raise Exception ("Aggregation Error!")
+                fieldsToAggregate.append(self.__tokens[i+2].text)
+                colums.append(self.__tokens[i+2].text)
+                i +=4
                     
-
-                    
-
+             
         if 'FROM' not in allTokenTypes:
             raise Exception ("FROM Expected")
         else:
@@ -217,14 +195,6 @@ class Parser:
                 if (self.__tokens[i].type == "COMMA" and self.__tokens[i+1].type != "VAR"):
                     raise Exception ("Variable expected on position ", i+1)
 
-
-        '''
-        print(colums)
-        print(tableName)
-        print(aggFunctions)
-        print(fieldsToAggregate)
-        print(groupByFields)
-        '''
         self.DB.Select(tableName ,colums, var1, cond ,var2)
             
             

@@ -17,7 +17,7 @@ queryListing = [
     'INSERT INTO names (87,2,3)',
     'INSERT INTO names (13,6,3)',
     'INSERT INTO names (2,7,3)',
-    'SELECT var1, var2 FROM names WHERE var1 >= 2'
+    'SELECT var1, var2 FROM names WHERE var1 >= 3'
     
 ]
 
