@@ -195,7 +195,7 @@ class Parser:
                 if (self.__tokens[i].type == "COMMA" and self.__tokens[i+1].type != "VAR"):
                     raise Exception ("Variable expected on position ", i+1)
 
-        self.DB.Select(tableName ,colums, var1, cond ,var2)
+        self.DB.Select(tableName ,colums, var1, cond ,var2, groupByFields)
             
             
     def parse(self):

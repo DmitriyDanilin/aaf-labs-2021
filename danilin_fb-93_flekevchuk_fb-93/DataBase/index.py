@@ -42,9 +42,9 @@ class DataBase:
         self.dataBase[name].CheckIfInColumns(toCheck)
         self.dataBase[name].Delete(param1, condition, param2)
 
-    def Select(self, name ,columns, var1, condition ,var2):
+    def Select(self, name ,columns, var1, condition ,var2, groupByFields):
         self.DoseTableExist(name)
-        allRows = self.dataBase[name].Select(columns, var1, condition ,var2)
+        allRows = self.dataBase[name].Select(columns, var1, condition ,var2, groupByFields)
         for row in allRows:
             print(row)
 

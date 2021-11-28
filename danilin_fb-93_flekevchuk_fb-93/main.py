@@ -13,11 +13,13 @@ queryListing = [
     'CREATE TABLE names ( var1 INDEXED, var2, var3)',
     'INSERT INTO names (1,2,3)',
     'INSERT INTO names (5,9,12)',
-    'INSERT INTO names (6,2,5)',
+    'INSERT INTO names (1,2,5)',
     'INSERT INTO names (87,2,3)',
     'INSERT INTO names (13,6,3)',
     'INSERT INTO names (2,7,3)',
-    'SELECT var1, var2 FROM names WHERE var1 >= 3'
+    #'SELECT var1, var2,var3 FROM names WHERE var1 >= -5'
+    #'DELETE FROM names WHERE var1 >= 2',
+    'SELECT var1, var2,var3 FROM names WHERE var1 >= -5 GROUPBY var2, var1'
     
 ]
 
@@ -27,7 +29,7 @@ queryListingForTest = [
 
 #while True:
 for query in queryListing:
-    print(query)
+    #print(query)
     #string = input()
     stringWithoutSpaces = remove(query)
 

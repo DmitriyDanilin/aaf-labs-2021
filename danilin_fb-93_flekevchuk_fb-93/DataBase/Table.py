@@ -1,20 +1,24 @@
+from functools import *
+
 from DataBase.Tree import Node
 from DataBase.BinaryOperators import allBinares
+
+ID = 'ID'
+INDEX = 'INDEX'
 
 class Table:
     def __init__(self, columns, indexesColumn):
         self.table = list()
-        self.indexedColumns = list()
-        self.indexes = dict()
-        self.columns = list(columns)
-        for index in indexesColumn:
-            i = 0
-            for column in columns:
-                if column == index:
-                    self.indexedColumns.append([column,i])
-                    break
-                i+=1
-            self.indexes[index] = Node(None, None)
+        self.columns = dict()
+        i = 0
+        for column in columns:
+            self.columns[column] = {}
+            self.columns[column][ID] = i
+            i+=1
+            if column in indexesColumn:
+                self.columns[column][INDEX] = Node(None, None)
+                continue
+            self.columns[column][INDEX] = None
 
     def findInColumns(self, columns):
         for column in columns:
@@ -25,11 +29,12 @@ class Table:
     def Insert(self, varsToInsert):
         id = len(self.table)
         self.table.append(varsToInsert)
-        for idColumns in self.indexedColumns:
-            self.indexes[idColumns[0]].insert(varsToInsert[idColumns[1]], id)
+        for column in self.columns:
+            if self.columns[column][INDEX]:
+                self.columns[column][INDEX].insert(varsToInsert[self.columns[column][ID]], id)
 
     def CheckNumberOfColumns(self, length):
-        if length != len(self.columns):
+        if length != len(self.columns.keys()):
             raise Exception ('Table has this number of columns ', len(self.columns))
 
     def CheckIfInColumns(self,columns):
@@ -41,9 +46,9 @@ class Table:
     def Delete(self, param1, condition, param2):
         allIDs = self.select(param1, condition, param2)
         for id in allIDs:
-            for index in self.indexedColumns:
-                print(index[0])
-                self.indexes[index[0]].DeleteWithID(self.table[id][index[1]], id)
+            for column in self.columns:
+                if self.columns[column][INDEX]:
+                    self.columns[column][INDEX].DeleteWithID(self.table[id][ self.columns[column][ID]], id)
             self.table[id] = None
 
     def select(self, param1, condition, param2):
@@ -51,30 +56,30 @@ class Table:
             #return self.ParsIndexCondition(param1.text, condition, param2.text)
             pass
         elif param1.type == 'VAR':
-            if  param1.text in self.indexes.keys():
+            if  param1.text in self.columns.keys():
                 return self.ParsIndexCondition(param1.text, condition, int(param2.text))
             return self.ParsCondition(param1.text, condition, int(param2.text))
         elif param2.type == 'VAR':
-            if param2.text in self.indexes.keys():
+            if param2.text in self.columns.keys():
                 return self.ParsIndexCondition(param2.text, condition, int(param1.text))
             return self.ParsCondition(param2.text, condition, int(param1.text))
 
     def ParsIndexCondition(self, index, condition, number):
         if condition.type == 'EQUAL':
-            return self.indexes[index].find(number)
+            return self.columns[index][INDEX].find(number)
         if condition.type == 'NOT_EQUAL':
-            return self.indexes[index].find(number)
+            return self.columns[index][INDEX].find(number)
         if condition.type == 'MORE_EQUAL':
-            return self.indexes[index].getAllIDsMore(number, True)
+            return self.columns[index][INDEX].getAllIDsMore(number, True)
         if condition.type == 'MORE':
-            return self.indexes[index].getAllIDsMore(number, False)
+            return self.columns[index][INDEX].getAllIDsMore(number, False)
         if condition.type == 'MORE_LESS':
-            return self.indexes[index].getAllIDsLess(number, True)
+            return self.columns[index][INDEX].getAllIDsLess(number, True)
         if condition.type == 'LESS':
-            return self.indexes[index].getAllIDsLess(number, False)
+            return self.columns[index][INDEX].getAllIDsLess(number, False)
 
     def ParsCondition(self, column, condition, number):
-        columnID = self.columns.index(column)
+        columnID = self.columns[column][ID]
         i = 0
         allIDs = []
         binaryCondition = allBinares[condition.type](number, columnID)
@@ -84,22 +89,67 @@ class Table:
             i+=1
         return allIDs
     
-    def Select(self, columns, var1, condition ,var2):
+    def Select(self, columns, var1, condition ,var2 , groupByFields):
         self.findInColumns(columns)
         allIDS = self.select(var1, condition, var2)
         allRows = []
-        columnsID = [self.columns.index(column) for column in columns ]
+        columnsID = [self.columns[column][ID] for column in columns ]
         for id in allIDS:
             allRows.append(self.table[id])
+        if len(groupByFields):
+            allRows = self.GroupBY(groupByFields, allRows)
+            return map(self.parsColumns(columnsID),allRows)
         return map(self.parsColumns(columnsID),allRows)
         
     def parsColumns(self, columnsID):
         return lambda row: [row[id] for id in columnsID]
 
-
+    def GroupBY(self, groupByFields, allRows):
+        groupedByRows = dict()
+        otherFields = list(filter(lambda column: column not in groupByFields, self.columns.keys()))
+        groupByFieldsID = [self.columns[column][ID] for column in groupByFields] 
+        for row in allRows:
+            keyElements = self.parsColumns(groupByFieldsID)(row)
+            key = self.CreateKey(keyElements)
+            if key in groupedByRows:
+                for field in otherFields:
+                    groupedByRows[key][field].append(row[self.columns[field][ID]])
+                continue
+            groupedByRows[key] = dict()
+            for field in otherFields:
+                groupedByRows[key][field] = list()
+                groupedByRows[key][field].append(row[self.columns[field][ID]]) 
+        return self.Agreggate(groupedByRows, groupByFields)
         
 
+    def CreateKey(self, valuse):
+        string_ints = [str(int) for int in valuse]
+        return  ":".join(string_ints)
+    
+    def parsValues(self, key):
+        strings = key.split(':')
+        return [float(str) for str in strings]
 
+    def Agreggate(self, groupedByRows, groupByFields):
+        rowID = 0
+        sizeOfRow = len(self.columns.keys())
+        allRows = [None]*len(groupedByRows.keys())
+        for key in groupedByRows:
+            allRows[rowID] = [0]*sizeOfRow 
+            parsedValues = self.parsValues(key)
+            id = 0
+            for field in groupByFields:
+                allRows[rowID][self.columns[field][ID]] = parsedValues[id]
+                id+=1
+            for field in groupedByRows[key]:
+                allRows[rowID][self.columns[field][ID]] = groupedByRows[key][field]
+            rowID+=1
+        return allRows
+            
+        
+        
+
+#25:45 var1 [3, 5, 6] var2 [] var3 [] .....
 
 
 '''

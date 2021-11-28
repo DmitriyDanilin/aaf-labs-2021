@@ -100,8 +100,6 @@ class Node:
             return 
         current.ids.remove(id)
         self.Delete(value)
-        self.PrintTree()
-        print()
         
     def Delete(self, data):
         parent = None
@@ -167,7 +165,7 @@ class Node:
 
 
 
-
+'''
 root = Node(11,11)
 root.insert(10,10)
 root.insert(14,14)
@@ -193,7 +191,7 @@ print('a0', root.getAllIDsMore(9.4, True))
 print('a0', root.getAllIDsMore(1000, True))
 print('a0', root.getAllIDsLess(9.4, True))
 
-
+'''
 
 
 
