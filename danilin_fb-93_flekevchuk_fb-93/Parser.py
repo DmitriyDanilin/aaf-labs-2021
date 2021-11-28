@@ -201,9 +201,9 @@ class Parser:
                 raise Exception ("Unknown token on position ", wherePosition+3)
 
         #variables to send condition
-        var1 = self.__tokens[wherePosition+1].text 
-        cond = self.__tokens[wherePosition+2].text
-        var2 = self.__tokens[wherePosition+3].text
+        var1 = self.__tokens[wherePosition+1] 
+        cond = self.__tokens[wherePosition+2]
+        var2 = self.__tokens[wherePosition+3]
         
         if 'GROUPBY' not in allTokenTypes:
             groupByPosition = -1
@@ -218,14 +218,14 @@ class Parser:
                     raise Exception ("Variable expected on position ", i+1)
 
 
-
+        '''
         print(colums)
         print(tableName)
         print(aggFunctions)
         print(fieldsToAggregate)
         print(groupByFields)
-
-    
+        '''
+        self.DB.Select(tableName ,colums, var1, cond ,var2)
             
             
     def parse(self):

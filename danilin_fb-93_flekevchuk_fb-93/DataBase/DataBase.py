@@ -46,3 +46,9 @@ class DataBase:
         self.IsTableExist(name)
         self.dataBase[name].CheckNumberOfColumns(len(varsToInsert))
         self.dataBase[name].Insert(varsToInsert)
+
+    def Select(self, name ,columns, var1, condition ,var2):
+        self.IsTableExist(name)
+        allRows = self.dataBase[name].Select(columns, var1, condition ,var2)
+        for row in allRows:
+            print(row)

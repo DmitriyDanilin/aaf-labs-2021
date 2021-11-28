@@ -16,6 +16,12 @@ class Table:
                 i+=1
             self.indexes[index] = Node(None, None)
 
+    def findInColumns(self, columns):
+        for column in columns:
+            if column not in self.columns:
+                raise Exception ('There is no such column as',column)
+                
+
     def Insert(self, varsToInsert):
         id = len(self.table)
         self.table.append(varsToInsert)
@@ -77,9 +83,19 @@ class Table:
                 allIDs.append(i)
             i+=1
         return allIDs
+    
+    def Select(self, columns, var1, condition ,var2):
+        self.findInColumns(columns)
+        allIDS = self.select(var1, condition, var2)
+        allRows = []
+        columnsID = [self.columns.index(column) for column in columns ]
+        for id in allIDS:
+            allRows.append(self.table[id])
+        return map(self.parsColumns(columnsID),allRows)
         
-        
-            
+    def parsColumns(self, columnsID):
+        return lambda row: [row[id] for id in columnsID]
+
 
         
 
