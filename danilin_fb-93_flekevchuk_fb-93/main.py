@@ -19,7 +19,7 @@ queryListing = [
     'INSERT INTO names (2,7,3)',
     #'SELECT var1, var2,var3 FROM names WHERE var1 >= -5'
     #'DELETE FROM names WHERE var1 >= 2',
-    'SELECT var1, var2,var3 FROM names WHERE var1 >= -5 GROUPBY var2, var1'
+    'SELECT var1, var2, COUNT_DISTINCT(var3) FROM names WHERE var1 >= -5 GROUPBY var2, var1'
     
 ]
 
