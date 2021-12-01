@@ -1,5 +1,5 @@
 from DataBase.Table import Table
-
+from prettytable import PrettyTable
 
 class DataBase:
     def __init__(self):
@@ -42,12 +42,19 @@ class DataBase:
         self.dataBase[name].CheckIfInColumns(toCheck)
         self.dataBase[name].Delete(param1, condition, param2)
 
-    def Select(self, name ,columns, var1, condition ,var2, groupByFields):
+    def Select(self, name ,columns, var1, condition ,var2, groupByFields, aggFunctions, fieldsToAggregate):
         self.DoseTableExist(name)
-        allRows = self.dataBase[name].Select(columns, var1, condition ,var2, groupByFields)
-        for row in allRows:
-            print(row)
+        data = self.dataBase[name].Select(columns, var1, condition ,var2, groupByFields, aggFunctions, fieldsToAggregate)
+        self.PrintTable(data)
+        
 
+    def PrintTable(self, data):
+        names = data[1]
+        rows = data[0]
+        table =  PrettyTable()
+        table.field_names = names
+        table.add_rows(rows)
+        print(table)
 
     
 

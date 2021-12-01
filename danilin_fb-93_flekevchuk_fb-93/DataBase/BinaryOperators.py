@@ -1,8 +1,8 @@
 allBinares = {
-    'EQUAL': lambda param, columnID: lambda var: param==var[columnID],
-    'NOT_EQUAL': lambda param, columnID: lambda var: param!=var[columnID],
-    'MORE_EQUAL': lambda param, columnID: lambda var: param<=var[columnID],
-    'LESS_EQUAL': lambda param, columnID: lambda var: param>=var[columnID],
-    'LESS': lambda param, columnID: lambda var: param>var[columnID],
-    'MORE': lambda param, columnID: lambda var: param<var[columnID]
+    'EQUAL': lambda param1, param2: param1==param2,
+    'NOT_EQUAL': lambda param1, param2: param1!=param2,
+    'MORE_EQUAL':  lambda param1, param2: param1>=param2,
+    'LESS_EQUAL':  lambda param1, param2: param1<=param2,
+    'LESS': lambda param1, param2: param1<param2,
+    'MORE': lambda param1, param2: param1>param2
 }

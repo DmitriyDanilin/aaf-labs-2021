@@ -2,6 +2,7 @@ from functools import *
 
 from DataBase.Tree import Node
 from DataBase.BinaryOperators import allBinares
+from DataBase.AgreggateFunc import AgreggateFunc
 
 ID = 'ID'
 INDEX = 'INDEX'
@@ -20,7 +21,8 @@ class Table:
                 continue
             self.columns[column][INDEX] = None
 
-    def findInColumns(self, columns):
+    def findInColumns(self, columns, groupByFields = [],  fieldsToAggregate = []):
+        
         for column in columns:
             if column not in self.columns:
                 raise Exception ('There is no such column as',column)
@@ -53,16 +55,23 @@ class Table:
 
     def select(self, param1, condition, param2):
         if param1.type == param2.type:
-            #return self.ParsIndexCondition(param1.text, condition, param2.text)
-            pass
+            allRows = []
+            i=0
+            for row in self.table:
+                if not row:
+                    continue
+                if allBinares[condition.type](row[self.columns[param1.text][ID]],row[self.columns[param2.text][ID]]):
+                    allRows.append(i)
+                i+=1
+            return allRows
         elif param1.type == 'VAR':
-            if  param1.text in self.columns.keys():
+            if  self.columns[param1.text][INDEX] :
                 return self.ParsIndexCondition(param1.text, condition, int(param2.text))
             return self.ParsCondition(param1.text, condition, int(param2.text))
-        elif param2.type == 'VAR':
-            if param2.text in self.columns.keys():
+        elif  self.columns[param2.text][INDEX]:
+            if self.columns[param2.text][INDEX]:
                 return self.ParsIndexCondition(param2.text, condition, int(param1.text))
-            return self.ParsCondition(param2.text, condition, int(param1.text))
+            return self.ParsCondition(int(param1.text), condition, param2.text)
 
     def ParsIndexCondition(self, index, condition, number):
         if condition.type == 'EQUAL':
@@ -78,33 +87,36 @@ class Table:
         if condition.type == 'LESS':
             return self.columns[index][INDEX].getAllIDsLess(number, False)
 
-    def ParsCondition(self, column, condition, number):
-        columnID = self.columns[column][ID]
+    def ParsCondition(self, param1, condition, param2):
         i = 0
         allIDs = []
-        binaryCondition = allBinares[condition.type](number, columnID)
         for row in self.table:
-            if binaryCondition(row):
+            if not row:
+                continue
+            value1 = row[self.columns[param1][ID]]
+            if allBinares[condition.type](value1,param2):
                 allIDs.append(i)
             i+=1
         return allIDs
     
-    def Select(self, columns, var1, condition ,var2 , groupByFields):
+    def Select(self, columns, var1, condition ,var2 , groupByFields, aggFunctions, fieldsToAggregate):
         self.findInColumns(columns)
         allIDS = self.select(var1, condition, var2)
         allRows = []
-        columnsID = [self.columns[column][ID] for column in columns ]
         for id in allIDS:
             allRows.append(self.table[id])
         if len(groupByFields):
-            allRows = self.GroupBY(groupByFields, allRows)
-            return map(self.parsColumns(columnsID),allRows)
-        return map(self.parsColumns(columnsID),allRows)
+            allRows = self.GroupBY(groupByFields, allRows,  aggFunctions, fieldsToAggregate)
+            allColumns = groupByFields + fieldsToAggregate
+            columnsID = [self.columns[column][ID] for column in allColumns]
+            return [map(self.parsColumns(columnsID),allRows), allColumns]
+        columnsID = [self.columns[column][ID] for column in columns ]
+        return [map(self.parsColumns(columnsID),allRows), columns]
         
     def parsColumns(self, columnsID):
         return lambda row: [row[id] for id in columnsID]
 
-    def GroupBY(self, groupByFields, allRows):
+    def GroupBY(self, groupByFields, allRows, aggFunctions, fieldsToAggregate):
         groupedByRows = dict()
         otherFields = list(filter(lambda column: column not in groupByFields, self.columns.keys()))
         groupByFieldsID = [self.columns[column][ID] for column in groupByFields] 
@@ -119,7 +131,7 @@ class Table:
             for field in otherFields:
                 groupedByRows[key][field] = list()
                 groupedByRows[key][field].append(row[self.columns[field][ID]]) 
-        return self.Agreggate(groupedByRows, groupByFields)
+        return self.Agreggate(groupedByRows, groupByFields, aggFunctions, fieldsToAggregate)
         
 
     def CreateKey(self, valuse):
@@ -130,7 +142,7 @@ class Table:
         strings = key.split(':')
         return [float(str) for str in strings]
 
-    def Agreggate(self, groupedByRows, groupByFields):
+    def Agreggate(self, groupedByRows, groupByFields, aggFunctions, fieldsToAggregate):
         rowID = 0
         sizeOfRow = len(self.columns.keys())
         allRows = [None]*len(groupedByRows.keys())
@@ -144,6 +156,11 @@ class Table:
             for field in groupedByRows[key]:
                 allRows[rowID][self.columns[field][ID]] = groupedByRows[key][field]
             rowID+=1
+        for row in allRows:
+            id = 0
+            for field in fieldsToAggregate: 
+                row[self.columns[field][ID]] = AgreggateFunc[aggFunctions[id]](row[self.columns[field][ID]])
+                id+=1
         return allRows
             
         
@@ -152,12 +169,5 @@ class Table:
 #25:45 var1 [3, 5, 6] var2 [] var3 [] .....
 
 
-'''
-'EQUAL': lambda a, b: a==b,
-    'NOT_EQUAL': lambda a, b: a!=b,
-    'MORE_EQUAL': lambda a, b: a>=b,
-    'LESS_EQUAL': lambda a, b: a<=b,
-    'LESS': lambda a, b: a<b,
-    'MORE': lambda a, b: a>b
-'''
+
         
