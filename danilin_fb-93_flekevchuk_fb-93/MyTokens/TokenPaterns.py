@@ -27,7 +27,7 @@ TokenPaterns = {
     'LESS':TokenPatern('LESS','<'),
     'MORE':TokenPatern('MORE','>'),
     'ALL':TokenPatern('ALL','\\*'),
-    'COUNT':TokenPatern('COUNT','COUNT'),
+    'COUNT':TokenPatern('COUNT','COUNT$'),
     'COUNT_DISTINCT':TokenPatern('COUNT_DISTINCT','COUNT_DISTINCT'),
     'MAX':TokenPatern('MAX','MAX'),
     'AVG':TokenPatern('AVG','AVG'),
