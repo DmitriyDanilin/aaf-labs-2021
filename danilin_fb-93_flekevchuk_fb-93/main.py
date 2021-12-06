@@ -24,24 +24,16 @@ queryListing = [
 ]
 
 
-#while True:
-for query in queryListing:
-    #print(query)
-    #string = input()
-    stringWithoutSpaces = remove(query)
+while True:
+    try:
+        string = input()
+        stringWithoutSpaces = remove(string)
 
-    lexer.setCode(stringWithoutSpaces)
-    lexer.LexserAnalis()
-    tokens = lexer.getTokenArr()
+        lexer.setCode(stringWithoutSpaces)
+        lexer.LexserAnalis()
+        tokens = lexer.getTokenArr()
 
-    parser.setTokens(tokens)
-    parser.parse()
-    #DB.PrintDB()
-
-
-
-'''
-for token in tokens:
-    print('{type: ' + token.type + ' , text: "'+ token.text + '" , pos ' + str(token.pos) + '}')
-string = 'SELECT id, name FROM map WHERE id >= 2'
-'''
+        parser.setTokens(tokens)
+        parser.parse()
+    except Exception as e:
+        print(e)
