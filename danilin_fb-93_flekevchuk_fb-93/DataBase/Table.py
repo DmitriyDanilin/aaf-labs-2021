@@ -101,6 +101,9 @@ class Table:
     
     def Select(self, columns, var1, condition ,var2 , groupByFields, aggFunctions, fieldsToAggregate):
         self.findInColumns(columns)
+        if condition.text in columns:
+            columnsID = [self.columns[column][ID] for column in columns ]
+            return[map(self.parsColumns(columnsID),self.table), columns]
         allIDS = self.select(var1, condition, var2)
         allRows = []
         for id in allIDS:

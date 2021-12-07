@@ -24,6 +24,7 @@ class DataBase:
         if name not in self.allTablesName:
             self.allTablesName.append(name) 
             self.dataBase[name] = Table(columns, indexes)
+            print('table with name', name, 'created')
         else :
             raise Exception ('Table with this name already exists')
 
@@ -31,6 +32,7 @@ class DataBase:
         self.DoseTableExist(name)
         self.dataBase[name].CheckNumberOfColumns(len(varsToInsert))
         self.dataBase[name].Insert(varsToInsert)
+        print('row inserted in table', name)
 
     def Delete(self, name, param1, condition, param2):
         self.DoseTableExist(name)
@@ -41,10 +43,12 @@ class DataBase:
             toCheck.append(param2)  
         self.dataBase[name].CheckIfInColumns(toCheck)
         self.dataBase[name].Delete(param1, condition, param2)
+        print('deleted row from table', name)
 
     def Select(self, name ,columns, var1, condition ,var2, groupByFields, aggFunctions, fieldsToAggregate):
         self.DoseTableExist(name)
         data = self.dataBase[name].Select(columns, var1, condition ,var2, groupByFields, aggFunctions, fieldsToAggregate)
+        print('====',name.upper(),'====')
         self.PrintTable(data)
         
 
