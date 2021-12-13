@@ -119,13 +119,16 @@ class Parser:
         if (self.__tokens[1].type != "VAR" and self.__tokens[1].type != "ALL" and  self.__tokens[1].type not in aggregationTypes ):
                  raise Exception ("Unknown token on position 1")
             
-
+        isAllInSelect = False
         if(self.__tokens[1].type == "ALL"):
+            isAllInSelect= True
             if(self.__tokens[2].type != "FROM"):
                 raise Exception ("Unknown token on position 2")
 
         i=1
         while i <= tokenLen: 
+            if(isAllInSelect):
+                break
             if(self.__tokens[i].type == "FROM"):
                 break
             if(self.__tokens[i].type == "VAR"):
